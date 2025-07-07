@@ -12,9 +12,14 @@ const COLORS = {
  * Square: A single square on the Tic Tac Toe board.
  */
 function Square({ value, onClick, highlight }) {
+  // Determine the class for X or O
+  let valueClass = '';
+  if (value === 'X') valueClass = 'ttt-x';
+  else if (value === 'O') valueClass = 'ttt-o';
+
   return (
     <button
-      className="ttt-square"
+      className={`ttt-square${value ? ' ' + valueClass : ''}`}
       onClick={onClick}
       aria-label={`Square ${value ?? ''}`}
       style={highlight
@@ -54,11 +59,17 @@ function Board({ squares, onSquareClick, winningLine }) {
  * Game status bar - indicates current player or result.
  */
 function GameStatus({ gameStatus, current, winner, isDraw }) {
+  // Helper to wrap X in green, O in yellow
+  const renderXO = (v) =>
+    v === 'X' ? <span className="ttt-x">X</span>
+    : v === 'O' ? <span className="ttt-o">O</span>
+    : v;
+
   let statusLabel;
   if (winner !== null) {
     statusLabel = (
       <span className="status-win">
-        🎉 Winner: <strong>{winner}</strong>
+        🎉 Winner: <strong>{renderXO(winner)}</strong>
       </span>
     );
   } else if (isDraw) {
@@ -68,9 +79,20 @@ function GameStatus({ gameStatus, current, winner, isDraw }) {
       </span>
     );
   } else {
+    // `current` may be 'X', 'O', 'User (X)', 'AI (O)'
+    const player =
+      current === 'X'
+        ? renderXO('X')
+        : current === 'O'
+        ? renderXO('O')
+        : typeof current === 'string' && current.includes('X')
+        ? <>User (<span className="ttt-x">X</span>)</>
+        : typeof current === 'string' && current.includes('O')
+        ? <>AI (<span className="ttt-o">O</span>)</>
+        : current;
     statusLabel = (
       <span className="status-turn">
-        Turn: <strong>{current === 'X' ? 'X' : 'O'}</strong>
+        Turn: <strong>{player}</strong>
       </span>
     );
   }

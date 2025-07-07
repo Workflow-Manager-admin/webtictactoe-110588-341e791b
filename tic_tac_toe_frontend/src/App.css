@@ -125,6 +125,18 @@ body, html, #root {
   text-shadow: 0 1.5px 10px rgba(60,50,60,0.09);
 }
 
+/* Green X */
+.ttt-x {
+  color: #24ba36; /* Green with good contrast */
+  text-shadow: 0 2px 8px rgba(36,180,54,0.08), 0 1px 0 rgba(44,150,60,0.13);
+}
+
+/* Yellow O */
+.ttt-o {
+  color: #eda600; /* Deep yellow/orange for visibility */
+  text-shadow: 0 1px 7px rgba(237,166,0,0.10), 0 2px 2px #fff2;
+}
+
 .ttt-square:focus, .ttt-square:hover {
   background: rgba(255,64,129, 0.07);
   color: var(--accent);
