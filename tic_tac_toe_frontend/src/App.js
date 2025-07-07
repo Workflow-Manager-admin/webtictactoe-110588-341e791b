@@ -101,20 +101,22 @@ function calculateWinner(squares) {
 }
 
 /**
- * Main App component.
+ * Main App component with PvP and Player vs AI mode, simple random AI, and current player status.
  */
 // PUBLIC_INTERFACE
 function App() {
-  // State for board, X is first
+  // Game mode: 'pvp' or 'pve' (player vs environment, i.e., AI)
+  const [mode, setMode] = useState('pvp');
+  // Who starts as X: 'player' or 'ai' (AI is always O in PvAI for simplicity)
   const [squares, setSquares] = useState(Array(9).fill(null));
   const [xIsNext, setXIsNext] = useState(true);
   const [history, setHistory] = useState([]);
-  const [theme, setTheme] = useState('light');
+  // Used to re-trigger AI/turns on mode/game reset
+  const [moveCount, setMoveCount] = useState(0);
 
-  // Apply provided color theme to CSS root variables (light only)
+  // Theme variables (per spec)
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', 'light');
-    // Apply custom palette
     document.documentElement.style.setProperty('--accent', COLORS.accent);
     document.documentElement.style.setProperty('--primary', COLORS.primary);
     document.documentElement.style.setProperty('--secondary', COLORS.secondary);
@@ -122,48 +124,171 @@ function App() {
     document.documentElement.style.setProperty('--board-border', '#e0e0e0');
   }, []);
 
-  // Game calculations
+  // Calculate winner info and draw state
   const { winner, line: winningLine } = calculateWinner(squares);
   const isDraw = !winner && squares.every(Boolean);
 
+  // Determines whose turn it is: for PvP: X/O, for PvAI: 'User' or 'AI'
+  const getTurnText = () => {
+    if (mode === 'pvp') {
+      return xIsNext ? 'X' : 'O';
+    } else {
+      // In PvAI: player is always X, AI is O
+      return xIsNext ? 'User (X)' : 'AI (O)';
+    }
+  };
+
   // PUBLIC_INTERFACE
+  // Handles square click logic for both modes
   const handleSquareClick = (i) => {
     if (squares[i] || winner) return;
+    // For PvAI, user (X) may play if it's their turn
+    if (mode === 'pve' && !xIsNext) return; // Only allow user to play 'X'
     const nextSquares = [...squares];
     nextSquares[i] = xIsNext ? 'X' : 'O';
     setHistory(h => [...h, squares]);
     setSquares(nextSquares);
     setXIsNext(!xIsNext);
+    setMoveCount(c => c + 1);
   };
 
   // PUBLIC_INTERFACE
+  // Handles restart, maintaining the same mode
   const handleRestart = () => {
     setSquares(Array(9).fill(null));
     setXIsNext(true);
     setHistory([]);
+    setMoveCount(c => c + 1); // For re-triggering AI on reset
   };
 
+  // PUBLIC_INTERFACE
+  // Handles switching modes, fully resets board
+  const handleModeChange = (newMode) => {
+    setMode(newMode);
+    setSquares(Array(9).fill(null));
+    setXIsNext(true);
+    setHistory([]);
+    setMoveCount(c => c + 1);
+  };
+
+  // PUBLIC_INTERFACE
+  // VERY SIMPLE AI LOGIC: returns the index where O should move, or null if not possible
+  function getAIMove(squares) {
+    // First: if AI can win, take it
+    for (let i = 0; i < 9; ++i) {
+      if (!squares[i]) {
+        const test = squares.slice();
+        test[i] = 'O';
+        if (calculateWinner(test).winner === 'O') return i;
+      }
+    }
+    // Block player win
+    for (let i = 0; i < 9; ++i) {
+      if (!squares[i]) {
+        const test = squares.slice();
+        test[i] = 'X';
+        if (calculateWinner(test).winner === 'X') return i;
+      }
+    }
+    // Otherwise: pick random open square
+    const open = [];
+    squares.forEach((v, idx) => { if (!v) open.push(idx); });
+    if (open.length === 0) return null;
+    return open[Math.floor(Math.random() * open.length)];
+  }
+
+  // AI move effect: triggers if mode is pve, O-turn, not over & board exists
+  useEffect(() => {
+    if (
+      mode === 'pve' &&
+      !xIsNext &&
+      !winner &&
+      !isDraw
+    ) {
+      // Slight delay for realism
+      const timeout = setTimeout(() => {
+        const aiMove = getAIMove(squares);
+        if (aiMove != null) {
+          const nextSquares = squares.slice();
+          nextSquares[aiMove] = 'O';
+          setHistory(h => [...h, squares]);
+          setSquares(nextSquares);
+          setXIsNext(true);
+          setMoveCount(c => c + 1);
+        }
+      }, 650);
+      return () => clearTimeout(timeout);
+    }
+    // eslint-disable-next-line
+  }, [mode, squares, xIsNext, winner, isDraw, moveCount]);
+
+  // Nice label for mode
+  const getModeLabel = () => (mode === 'pvp' ? 'Player vs Player' : 'Player vs AI');
+
   // Styling variables for minimalist layout/colors
-  // Center content, max width of board, space for controls/status
   return (
     <div className="ttt-app">
       <main className="ttt-main-container">
         <div className="ttt-header" style={{ color: 'var(--primary)' }}>
           <h1 className="ttt-title">Tic Tac Toe</h1>
-          <p className="ttt-description">Minimal Tic Tac Toe — React Demo</p>
+          <p className="ttt-description">
+            Minimal Tic Tac Toe — React Demo
+          </p>
         </div>
-        <GameStatus
-          gameStatus={winner ? 'win' : isDraw ? 'draw' : 'active'}
-          current={xIsNext ? 'X' : 'O'}
-          winner={winner}
-          isDraw={isDraw}
-        />
+
+        {/* Mode selection */}
+        <div className="ttt-controls" style={{ marginBottom: 10, marginTop: 3 }}>
+          <button
+            className="ttt-btn"
+            style={{
+              background: mode === 'pvp' ? 'var(--primary)' : 'var(--accent)',
+              color: '#fff'
+            }}
+            aria-pressed={mode === 'pvp'}
+            onClick={() => handleModeChange('pvp')}
+            disabled={mode === 'pvp'}
+            tabIndex={0}
+          >
+            PvP
+          </button>
+          <button
+            className="ttt-btn"
+            style={{
+              background: mode === 'pve' ? 'var(--primary)' : 'var(--accent)',
+              color: '#fff'
+            }}
+            aria-pressed={mode === 'pve'}
+            onClick={() => handleModeChange('pve')}
+            disabled={mode === 'pve'}
+            tabIndex={0}
+          >
+            PvAI
+          </button>
+        </div>
+        <div
+          className="ttt-status"
+          style={{ margin: '2px 0 0 0', textAlign: 'center', fontWeight: 500, fontSize: '1.02rem', color: 'var(--text-primary)' }}
+        >
+          Mode: <span style={{ fontWeight: 700, color: 'var(--primary)' }}>{getModeLabel()}</span>
+        </div>
+
+        {/* Show whose turn it is, or winner/draw */}
+        <div>
+          <GameStatus
+            gameStatus={winner ? 'win' : isDraw ? 'draw' : 'active'}
+            current={getTurnText()}
+            winner={winner}
+            isDraw={isDraw}
+          />
+        </div>
+
         <Board
           squares={squares}
           onSquareClick={handleSquareClick}
           winningLine={winningLine}
         />
-        <div className="ttt-controls">
+
+        <div className="ttt-controls" style={{ marginTop: 10 }}>
           <button
             className="ttt-btn"
             onClick={handleRestart}
