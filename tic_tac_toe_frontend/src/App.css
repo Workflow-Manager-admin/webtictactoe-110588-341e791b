@@ -71,9 +71,17 @@ body, html, #root {
 }
 .ttt-description {
   font-size: 1rem;
-  color: var(--text-secondary);
+  color: #fff;
   margin: 0 0 12px 0;
-  text-shadow: 0 1px 8px rgba(20,20,33,0.07);
+  font-weight: 500;
+  text-shadow:
+    0 2px 10px rgba(0,0,0,0.69),
+    0 0px 1.5px rgba(25,30,48,0.20),
+    0 0.5px 0.5px rgba(30,40,70,0.22);
+  letter-spacing: 0.01em;
+  filter: brightness(1.1);
+  /* Optional: add a subtle outer stroke/edge for max legibility */
+  -webkit-text-stroke: 0.45px #292c4144;
 }
 
 /* Game board */
