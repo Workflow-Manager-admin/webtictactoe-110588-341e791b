@@ -15,7 +15,13 @@
 
 body, html, #root {
   min-height: 100vh;
-  background: var(--bg-primary);
+  /* Cinematic royalty-free background with dark overlay for readability */
+  background: 
+    linear-gradient(
+      rgba(20,24,38,0.63),  /* dark overlay for contrast */
+      rgba(20,24,38,0.67)
+    ),
+    url('https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=1200&q=80') center center/cover no-repeat fixed;
   color: var(--text-primary);
   margin: 0;
   padding: 0;
@@ -27,7 +33,9 @@ body, html, #root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--bg-primary);
+  /* Subtle backdrop blur for extra clarity of foreground UI */
+  background: rgba(255,255,255,0.01);
+  backdrop-filter: blur(0.5px);
 }
 
 .ttt-main-container {
@@ -40,11 +48,18 @@ body, html, #root {
   min-width: 0;
   margin: 0 auto;
   padding: 32px 8px 0 8px;
+  /* Add a subtle frosted translucent background for readability */
+  background: rgba(252,252,255,0.18);
+  border-radius: 22px;
+  box-shadow: 0 6px 40px rgba(0,0,0,0.14);
+  /* prevent backdrop from shining through too aggressively on mobile */
+  backdrop-filter: blur(1.5px);
 }
 
 .ttt-header {
   text-align: center;
   margin-bottom: 16px;
+  background: transparent;
 }
 .ttt-title {
   font-size: 2.1rem;
@@ -52,11 +67,13 @@ body, html, #root {
   letter-spacing: 0.01em;
   margin: 0 0 6px 0;
   color: var(--primary);
+  text-shadow: 0 2px 12px rgba(30,40,70,0.12);
 }
 .ttt-description {
   font-size: 1rem;
   color: var(--text-secondary);
   margin: 0 0 12px 0;
+  text-shadow: 0 1px 8px rgba(20,20,33,0.07);
 }
 
 /* Game board */
@@ -67,9 +84,10 @@ body, html, #root {
   max-width: 93vw;
   aspect-ratio: 1 / 1;
   margin: 0 auto;
-  background: var(--board-bg);
+  background:
+    linear-gradient(120deg, rgba(255,255,255,0.92) 85%,rgba(245,245,255,0.90) 100%);
   border-radius: 20px;
-  box-shadow: 0 4px 24px rgba(25, 118, 210, 0.08);
+  box-shadow: 0 4px 24px rgba(25, 118, 210, 0.08), 0 2px 20px rgba(0,0,0,0.09);
   border: 2px solid var(--board-border);
   user-select: none;
   margin-top: 16px;
@@ -87,7 +105,7 @@ body, html, #root {
   font-size: 2.4rem;
   font-weight: 800;
   border: 1.5px solid var(--board-border);
-  background: var(--board-bg);
+  background: rgba(255,255,255,0.88);
   color: var(--secondary);
   cursor: pointer;
   outline: none;
@@ -95,6 +113,8 @@ body, html, #root {
   border-radius: 7px;
   margin: 4px;
   box-sizing: border-box;
+  /* Subtle shadow for legibility */
+  text-shadow: 0 1.5px 10px rgba(60,50,60,0.09);
 }
 
 .ttt-square:focus, .ttt-square:hover {
@@ -162,13 +182,32 @@ body, html, #root {
 
 /* Responsive - Mobile */
 @media (max-width: 430px) {
-  .ttt-main-container { padding-top: 22px; }
+  .ttt-main-container {
+    padding-top: 22px;
+    border-radius: 0;
+    margin: 0 auto;
+    box-shadow: none;
+    background: rgba(240,240,250,0.26);
+    backdrop-filter: blur(0.5px);
+  }
   .ttt-header { margin-bottom: 9px; }
   .ttt-title { font-size: 1.16rem; }
   .ttt-description { font-size: 0.99rem; }
-  .ttt-board { width: 98vw; min-width: 0; max-width: 100vw; border-radius: 6vw; }
+  .ttt-board {
+    width: 98vw;
+    min-width: 0;
+    max-width: 100vw;
+    border-radius: 6vw;
+    background: linear-gradient(120deg,rgba(255,255,255,0.96) 95%,rgba(235,240,250,0.90) 100%);
+  }
   .ttt-row { min-height: 0; }
-  .ttt-square { font-size: 2rem; min-width: 0; margin: 2.1vw; border-radius: 13px; }
+  .ttt-square {
+    font-size: 2rem;
+    min-width: 0;
+    margin: 2.1vw;
+    border-radius: 13px;
+    background: rgba(255,255,255,0.97);
+  }
   .ttt-controls { flex-direction: column; }
 }
 
